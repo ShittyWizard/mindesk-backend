@@ -9,7 +9,10 @@ import (
 
 var mongodb *mongo.Database
 
-func InitMongoDB(dataSource string)  {
+// Mongo address for only docker (it could be run by scripts/start-docker-test-env.sh
+var TestMongoAddress = "mongodb://localhost:27017"
+
+func InitMongoDB(dataSource string) {
 	clientOptions := options.Client().ApplyURI(dataSource)
 
 	client, err := mongo.Connect(context.Background(), clientOptions)

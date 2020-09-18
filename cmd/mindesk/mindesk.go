@@ -7,6 +7,7 @@ import (
 	"net/http"
 )
 
+// Mongo address in docker-compose
 var mongoAddress = "mongodb://mongodb:27017"
 
 func main() {
