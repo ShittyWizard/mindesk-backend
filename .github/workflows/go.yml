@@ -32,8 +32,8 @@ jobs:
 
     - name: Build
       run: |
-        cd min-desk-backend/cmd/mindesk
-        go build -v mindesk-app
+        cd cmd/mindesk
+        go build -v .
       
     - name: Start MongoDB
       # You may pin to the exact commit or the version.
