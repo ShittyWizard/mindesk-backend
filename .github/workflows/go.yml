@@ -32,7 +32,7 @@ jobs:
 
     - name: Build
       run: |
-        cd cmd/mindesk
+        cd min-desk-backend/cmd/mindesk
         go build -v mindesk-app
       
     - name: Start MongoDB
