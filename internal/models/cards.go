@@ -6,21 +6,22 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"log"
+	"time"
 )
 
 type Card struct {
-	Id          primitive.ObjectID `bson:"_id,omitempty"`
+	Id          primitive.ObjectID `json:"id,omitempty" bson:"_id,omitempty"`
 	Name        string             `json:"name,omitempty"`
 	Description string             `json:"description,omitempty"`
-	AssignedTo  string             `bson:"assignedTo,omitempty"`
-	DueDate     string             `bson:"dueDate,omitempty"`
+	AssignedTo  string             `json:"assignedTo,omitempty" bson:"assignedTo,omitempty"`
+	DueDate     primitive.DateTime `json:"dueDate,omitempty" bson:"dueDate,omitempty"`
 }
 
 type CardUpdate struct {
 	Name        string `json:"name,omitempty"`
 	Description string `json:"description,omitempty"`
-	AssignedTo  string `bson:"assignedTo,omitempty"`
-	DueDate     string `bson:"dueDate,omitempty"`
+	AssignedTo  string `json:"assignedTo,omitempty" bson:"assignedTo,omitempty"`
+	DueDate     string `json:"dueDate,omitempty" bson:"dueDate,omitempty"`
 }
 
 var cardsCollectionName = "cards"
@@ -32,19 +33,19 @@ func InitCardsCollection() {
 	log.Println("Connected to MongoDB...")
 }
 
-// If you change size if test cards - test it too in test/models/cards_test.go:17
+// If you change size of test cards - test it too in test/models/cards_test.go:17
 func AddTestCards() {
 	cardsCollection.DeleteMany(context.Background(), bson.D{})
-	testCard1 := Card{primitive.NewObjectID(), "test name 1", "test description 1", "me1", "10.08.2021"}
+	testCard1 := CardUpdate{"test name 1", "test description 1", "me1", "25-09-2020"}
 	AddCard(testCard1)
 
-	testCard2 := Card{primitive.NewObjectID(), "test name 2", "test description 2", "me2", "11.08.2021"}
+	testCard2 := CardUpdate{"test name 2", "test description 2", "me2", "31-12-2020"}
 	AddCard(testCard2)
 
-	testCard3 := Card{primitive.NewObjectID(), "test name 3", "test description 3", "me3", "12.08.2021"}
+	testCard3 := CardUpdate{"test name 3", "test description 3", "me3", "28-10-2020"}
 	AddCard(testCard3)
 
-	testCard4 := Card{primitive.NewObjectID(), "test name 4", "test description 4", "me4", "13.08.2021"}
+	testCard4 := CardUpdate{"test name 4", "test description 4", "me4", "26-05-2021"}
 	AddCard(testCard4)
 }
 
@@ -75,13 +76,24 @@ func GetCardById(cardId primitive.ObjectID) Card {
 	return card
 }
 
-func AddCard(card Card) primitive.ObjectID {
-	card.Id = primitive.NewObjectID()
-	_, err := cardsCollection.InsertOne(context.Background(), card)
+func AddCard(cardUpdate CardUpdate) primitive.ObjectID {
+	cardId := primitive.NewObjectID()
+	var card Card
+	card.Id = cardId
+	card.Name = cardUpdate.Name
+	card.Description = cardUpdate.Description
+	card.AssignedTo = cardUpdate.AssignedTo
+
+	dueDate, err := time.Parse("02-01-2006", cardUpdate.DueDate)
 	if err != nil {
 		log.Fatal(err)
 	}
-	return card.Id
+	card.DueDate = primitive.NewDateTimeFromTime(dueDate)
+	_, err = cardsCollection.InsertOne(context.Background(), card)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return cardId
 }
 
 func EditCard(cardId primitive.ObjectID, cardUpdate CardUpdate) Card {
@@ -96,7 +108,11 @@ func EditCard(cardId primitive.ObjectID, cardUpdate CardUpdate) Card {
 		updatedFields = append(updatedFields, bson.E{Key: "assignedTo", Value: cardUpdate.AssignedTo})
 	}
 	if len(cardUpdate.DueDate) != 0 {
-		updatedFields = append(updatedFields, bson.E{Key: "dueDate", Value: cardUpdate.DueDate})
+		newDueDate, err := time.Parse("02-01-2006", cardUpdate.DueDate)
+		if err != nil {
+			log.Fatal(err)
+		}
+		updatedFields = append(updatedFields, bson.E{Key: "dueDate", Value: primitive.NewDateTimeFromTime(newDueDate)})
 	}
 	if len(updatedFields) == 0 {
 		return GetCardById(cardId)

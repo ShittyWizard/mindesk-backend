@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
 
-bash stop-docker-test-env.sh
-docker build -t mindesk .
-docker-compose up
+sudo sh ./stop-docker-test-env.sh
+sudo docker-compose up

@@ -26,13 +26,14 @@ func getAllCards(w http.ResponseWriter, r *http.Request) {
 
 func addNewCard(w http.ResponseWriter, r *http.Request) {
 	log.Println("Got response addNewCard")
-	var card models.Card
-	err := json.NewDecoder(r.Body).Decode(&card)
+	var cardInitUpdate models.CardUpdate
+	err := json.NewDecoder(r.Body).Decode(&cardInitUpdate)
 	if err != nil {
 		log.Fatal(err)
 	}
-	models.AddCard(card)
-	err = json.NewEncoder(w).Encode(&card)
+	cardId := models.AddCard(cardInitUpdate)
+	insertedCard := models.GetCardById(cardId)
+	err = json.NewEncoder(w).Encode(&insertedCard)
 	if err != nil {
 		log.Fatal(err)
 	}

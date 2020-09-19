@@ -27,12 +27,11 @@ func TestGetAllCards(t *testing.T) {
 
 func TestAddCard(t *testing.T) {
 	initSize := len(models.GetAllCards())
-	insertedCardId = models.AddCard(models.Card{
-		Id:          primitive.ObjectID{},
+	insertedCardId = models.AddCard(models.CardUpdate{
 		Name:        "test1",
 		Description: "test2 description",
 		AssignedTo:  "John Johnson",
-		DueDate:     "13.08.2021",
+		DueDate:     "31-12-2020",
 	})
 	newSize := len(models.GetAllCards())
 	if newSize <= initSize {
@@ -44,7 +43,7 @@ func TestEditCard(t *testing.T) {
 		Name:        "Updated name",
 		Description: "Updated description",
 		AssignedTo:  "Peter Peterson",
-		DueDate:     "14.09.2021",
+		DueDate:     "25-09-2020",
 	}
 	editCard := models.EditCard(insertedCardId, cardUpdate)
 	if len(cardUpdate.Name) != 0 && editCard.Name != cardUpdate.Name {
@@ -56,8 +55,8 @@ func TestEditCard(t *testing.T) {
 	if len(cardUpdate.AssignedTo) != 0 && editCard.AssignedTo != cardUpdate.AssignedTo {
 		t.Errorf("Editing of card works incorrectly. Card's AssignedTo: %s, CardUpdate's AssignedTo: %s", editCard.AssignedTo, cardUpdate.AssignedTo)
 	}
-	if len(cardUpdate.DueDate) != 0 && editCard.DueDate != cardUpdate.DueDate {
-		t.Errorf("Editing of card works incorrectly. Card's DueDate: %s, CardUpdate's DueDate: %s", editCard.DueDate, cardUpdate.DueDate)
+	if len(cardUpdate.DueDate) != 0 && editCard.DueDate.Time().Format("02-01-2006") != cardUpdate.DueDate {
+		t.Errorf("Editing of card works incorrectly. Card's DueDate: %T, CardUpdate's DueDate: %T", &editCard.DueDate, &cardUpdate.DueDate)
 	}
 }
 
