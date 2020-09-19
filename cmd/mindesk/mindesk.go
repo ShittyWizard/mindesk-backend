@@ -7,16 +7,10 @@ import (
 	"net/http"
 )
 
-// Mongo address in docker-compose
-var mongoAddress = "mongodb://mongodb:27017"
-
 func main() {
 	log.Println("Server started...")
-	models.InitMongoDB(mongoAddress)
-	models.InitCardsCollection()
+	models.InitMongoDB(models.MongoAddress)
 
-	// adding test data
-	models.AddTestCards()
 	log.Println("Test data was added")
 
 	r := handlers.InitRouter()
