@@ -9,12 +9,8 @@ import (
 
 var insertedCardId primitive.ObjectID
 
-func TestSetupDevEnv(t *testing.T) {
+func TestCardsSetupDevEnv(t *testing.T) {
 	models.InitMongoDB(models.TestMongoAddress)
-	models.InitCardsCollection()
-
-	// Add 4 test cards
-	models.AddTestCards()
 }
 
 func TestGetAllCards(t *testing.T) {
@@ -27,12 +23,16 @@ func TestGetAllCards(t *testing.T) {
 
 func TestAddCard(t *testing.T) {
 	initSize := len(models.GetAllCards())
-	insertedCardId = models.AddCard(models.CardUpdate{
+	var err error
+	insertedCardId, err = models.AddCard(models.CardUpdate{
 		Name:        "test1",
 		Description: "test2 description",
 		AssignedTo:  "John Johnson",
 		DueDate:     "31-12-2020",
 	})
+	if err != nil {
+		t.Errorf("Got error: %s", err)
+	}
 	newSize := len(models.GetAllCards())
 	if newSize <= initSize {
 		t.Errorf("Adding card works incorrectly. Init size: %d, new size: %d", initSize, newSize)
@@ -45,7 +45,11 @@ func TestEditCard(t *testing.T) {
 		AssignedTo:  "Peter Peterson",
 		DueDate:     "25-09-2020",
 	}
-	editCard := models.EditCard(insertedCardId, cardUpdate)
+	var err error
+	editCard, err := models.EditCard(insertedCardId, cardUpdate)
+	if err != nil {
+		t.Errorf("Got error: %s", err)
+	}
 	if len(cardUpdate.Name) != 0 && editCard.Name != cardUpdate.Name {
 		t.Errorf("Editing of card works incorrectly. Card's name: %s, CardUpdate's name: %s", editCard.Name, cardUpdate.Name)
 	}
@@ -64,7 +68,7 @@ func TestDeleteCard(t *testing.T) {
 	sizeBeforeDeleting := len(models.GetAllCards())
 	err := models.DeleteCard(insertedCardId)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	sizeAfterDeleting := len(models.GetAllCards())
 	if sizeAfterDeleting >= sizeBeforeDeleting {

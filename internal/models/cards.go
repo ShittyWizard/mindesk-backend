@@ -15,6 +15,7 @@ type Card struct {
 	Description string             `json:"description,omitempty"`
 	AssignedTo  string             `json:"assignedTo,omitempty" bson:"assignedTo,omitempty"`
 	DueDate     primitive.DateTime `json:"dueDate,omitempty" bson:"dueDate,omitempty"`
+	DeskId      primitive.ObjectID `json:"deskId,omitempty" bson:"deskId,omitempty"`
 }
 
 type CardUpdate struct {
@@ -28,38 +29,38 @@ var cardsCollectionName = "cards"
 var cardsCollection *mongo.Collection
 
 func InitCardsCollection() {
-	log.Println("Trying to connect to MongoDB...")
+	log.Println("Initialising CARDS collection...")
 	cardsCollection = mongodb.Collection(cardsCollectionName)
-	log.Println("Connected to MongoDB...")
+	log.Println("CARDS collection initialised...")
 }
 
 // If you change size of test cards - test it too in test/models/cards_test.go:17
 func AddTestCards() {
 	cardsCollection.DeleteMany(context.Background(), bson.D{})
 	testCard1 := CardUpdate{"test name 1", "test description 1", "me1", "25-09-2020"}
-	AddCard(testCard1)
+	_, _ = AddCard(testCard1)
 
 	testCard2 := CardUpdate{"test name 2", "test description 2", "me2", "31-12-2020"}
-	AddCard(testCard2)
+	_, _ = AddCard(testCard2)
 
 	testCard3 := CardUpdate{"test name 3", "test description 3", "me3", "28-10-2020"}
-	AddCard(testCard3)
+	_, _ = AddCard(testCard3)
 
 	testCard4 := CardUpdate{"test name 4", "test description 4", "me4", "26-05-2021"}
-	AddCard(testCard4)
+	_, _ = AddCard(testCard4)
 }
 
 func GetAllCards() []*Card {
 	var cards []*Card
 	cursor, err := cardsCollection.Find(context.Background(), bson.D{})
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	for cursor.Next(context.Background()) {
 		card := Card{}
 		err := cursor.Decode(&card)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 		cards = append(cards, &card)
 	}
@@ -67,16 +68,16 @@ func GetAllCards() []*Card {
 	return cards
 }
 
-func GetCardById(cardId primitive.ObjectID) Card {
+func GetCardById(cardId primitive.ObjectID) (Card, error) {
 	var card Card
 	err := cardsCollection.FindOne(context.Background(), bson.D{{"_id", cardId}}).Decode(&card)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
-	return card
+	return card, err
 }
 
-func AddCard(cardUpdate CardUpdate) primitive.ObjectID {
+func AddCard(cardUpdate CardUpdate) (primitive.ObjectID, error) {
 	cardId := primitive.NewObjectID()
 	var card Card
 	card.Id = cardId
@@ -86,17 +87,19 @@ func AddCard(cardUpdate CardUpdate) primitive.ObjectID {
 
 	dueDate, err := time.Parse("02-01-2006", cardUpdate.DueDate)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return cardId, err
 	}
 	card.DueDate = primitive.NewDateTimeFromTime(dueDate)
 	_, err = cardsCollection.InsertOne(context.Background(), card)
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return cardId, err
 	}
-	return cardId
+	return cardId, err
 }
 
-func EditCard(cardId primitive.ObjectID, cardUpdate CardUpdate) Card {
+func EditCard(cardId primitive.ObjectID, cardUpdate CardUpdate) (Card, error) {
 	updatedFields := bson.D{}
 	if len(cardUpdate.Name) != 0 {
 		updatedFields = append(updatedFields, bson.E{Key: "name", Value: cardUpdate.Name})
@@ -110,7 +113,7 @@ func EditCard(cardId primitive.ObjectID, cardUpdate CardUpdate) Card {
 	if len(cardUpdate.DueDate) != 0 {
 		newDueDate, err := time.Parse("02-01-2006", cardUpdate.DueDate)
 		if err != nil {
-			log.Fatal(err)
+			log.Println(err)
 		}
 		updatedFields = append(updatedFields, bson.E{Key: "dueDate", Value: primitive.NewDateTimeFromTime(newDueDate)})
 	}
@@ -122,10 +125,10 @@ func EditCard(cardId primitive.ObjectID, cardUpdate CardUpdate) Card {
 		bson.M{"_id": cardId},
 		bson.D{
 			{"$set", updatedFields},
-			//{"$set", bson.D{{"name", "Updated but in code"}}},
 		})
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
+		return Card{}, err
 	}
 
 	return GetCardById(cardId)
@@ -134,7 +137,7 @@ func EditCard(cardId primitive.ObjectID, cardUpdate CardUpdate) Card {
 func DeleteCard(cardId primitive.ObjectID) error {
 	_, err := cardsCollection.DeleteOne(context.Background(), bson.D{{"_id", cardId}})
 	if err != nil {
-		log.Fatal(err)
+		log.Println(err)
 	}
 	return err
 }
