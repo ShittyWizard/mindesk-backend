@@ -63,8 +63,8 @@ func TestEditCard(t *testing.T) {
 	if len(cardUpdate.DueDate) != 0 && editCard.DueDate.Time().Format("02-01-2006") != cardUpdate.DueDate {
 		t.Errorf("Editing of card works incorrectly. Card's DueDate: %T, CardUpdate's DueDate: %T", &editCard.DueDate, &cardUpdate.DueDate)
 	}
-	if len(cardUpdate.DeskId) != 0 && editCard.DeskId.String() != cardUpdate.DeskId {
-		t.Errorf("Editing of card works incorrectly. Card's AssignedTo: %s, CardUpdate's AssignedTo: %s", editCard.AssignedTo, cardUpdate.AssignedTo)
+	if len(cardUpdate.DeskId) != 0 && editCard.DeskId.Hex() != cardUpdate.DeskId {
+		t.Errorf("Editing of card works incorrectly. Card's Desk Id: %s, CardUpdate's Desk Id: %s", editCard.DeskId.Hex(), cardUpdate.DeskId)
 	}
 }
 
