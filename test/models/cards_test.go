@@ -44,7 +44,7 @@ func TestEditCard(t *testing.T) {
 		Description: "Updated description",
 		AssignedTo:  "Peter Peterson",
 		DueDate:     "25-09-2020",
-		DeskId:      primitive.NewObjectID().String(),
+		DeskId:      primitive.NewObjectID().Hex(),
 	}
 	var err error
 	editCard, err := models.EditCard(insertedCardId, cardUpdate)
