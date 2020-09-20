@@ -44,6 +44,7 @@ func TestEditCard(t *testing.T) {
 		Description: "Updated description",
 		AssignedTo:  "Peter Peterson",
 		DueDate:     "25-09-2020",
+		DeskId:      primitive.NewObjectID().Hex(),
 	}
 	var err error
 	editCard, err := models.EditCard(insertedCardId, cardUpdate)
@@ -61,6 +62,9 @@ func TestEditCard(t *testing.T) {
 	}
 	if len(cardUpdate.DueDate) != 0 && editCard.DueDate.Time().Format("02-01-2006") != cardUpdate.DueDate {
 		t.Errorf("Editing of card works incorrectly. Card's DueDate: %T, CardUpdate's DueDate: %T", &editCard.DueDate, &cardUpdate.DueDate)
+	}
+	if len(cardUpdate.DeskId) != 0 && editCard.DeskId.Hex() != cardUpdate.DeskId {
+		t.Errorf("Editing of card works incorrectly. Card's Desk Id: %s, CardUpdate's Desk Id: %s", editCard.DeskId.Hex(), cardUpdate.DeskId)
 	}
 }
 
