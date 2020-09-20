@@ -33,6 +33,6 @@ func InitMongoDB(dataSource string) {
 	InitDesksCollection()
 
 	// Init test data
-	AddTestCards()
-	AddTestDesks()
+	testDeskId := AddTestDesks()[0]
+	AddTestCards(testDeskId)
 }

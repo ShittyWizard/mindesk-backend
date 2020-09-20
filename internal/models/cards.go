@@ -23,6 +23,7 @@ type CardUpdate struct {
 	Description string `json:"description,omitempty"`
 	AssignedTo  string `json:"assignedTo,omitempty" bson:"assignedTo,omitempty"`
 	DueDate     string `json:"dueDate,omitempty" bson:"dueDate,omitempty"`
+	DeskId      string `json:"deskId,omitempty" bson:"deskId,omitempty"`
 }
 
 var cardsCollectionName = "cards"
@@ -35,24 +36,43 @@ func InitCardsCollection() {
 }
 
 // If you change size of test cards - test it too in test/models/cards_test.go:17
-func AddTestCards() {
+func AddTestCards(deskId primitive.ObjectID) {
 	cardsCollection.DeleteMany(context.Background(), bson.D{})
-	testCard1 := CardUpdate{"test name 1", "test description 1", "me1", "25-09-2020"}
+	testCard1 := CardUpdate{"test name 1", "test description 1", "me1", "25-09-2020", deskId.Hex()}
 	_, _ = AddCard(testCard1)
 
-	testCard2 := CardUpdate{"test name 2", "test description 2", "me2", "31-12-2020"}
+	testCard2 := CardUpdate{"test name 2", "test description 2", "me2", "31-12-2020", deskId.Hex()}
 	_, _ = AddCard(testCard2)
 
-	testCard3 := CardUpdate{"test name 3", "test description 3", "me3", "28-10-2020"}
+	testCard3 := CardUpdate{"test name 3", "test description 3", "me3", "28-10-2020", deskId.Hex()}
 	_, _ = AddCard(testCard3)
 
-	testCard4 := CardUpdate{"test name 4", "test description 4", "me4", "26-05-2021"}
+	testCard4 := CardUpdate{"test name 4", "test description 4", "me4", "26-05-2021", deskId.Hex()}
 	_, _ = AddCard(testCard4)
 }
 
+// todo: make filter for getting cards (by deskId, dueDate and etc...)
 func GetAllCards() []*Card {
 	var cards []*Card
 	cursor, err := cardsCollection.Find(context.Background(), bson.D{})
+	if err != nil {
+		log.Println(err)
+	}
+	for cursor.Next(context.Background()) {
+		card := Card{}
+		err := cursor.Decode(&card)
+		if err != nil {
+			log.Println(err)
+		}
+		cards = append(cards, &card)
+	}
+
+	return cards
+}
+
+func GetAllCardsByDeskId(deskId primitive.ObjectID) []*Card {
+	var cards []*Card
+	cursor, err := cardsCollection.Find(context.Background(), bson.D{{"deskId", deskId}})
 	if err != nil {
 		log.Println(err)
 	}
@@ -84,6 +104,7 @@ func AddCard(cardUpdate CardUpdate) (primitive.ObjectID, error) {
 	card.Name = cardUpdate.Name
 	card.Description = cardUpdate.Description
 	card.AssignedTo = cardUpdate.AssignedTo
+	card.DeskId, _ = primitive.ObjectIDFromHex(cardUpdate.DeskId)
 
 	dueDate, err := time.Parse("02-01-2006", cardUpdate.DueDate)
 	if err != nil {
@@ -116,6 +137,9 @@ func EditCard(cardId primitive.ObjectID, cardUpdate CardUpdate) (Card, error) {
 			log.Println(err)
 		}
 		updatedFields = append(updatedFields, bson.E{Key: "dueDate", Value: primitive.NewDateTimeFromTime(newDueDate)})
+	}
+	if len(cardUpdate.DeskId) != 0 {
+		updatedFields = append(updatedFields, bson.E{Key: "deskId", Value: cardUpdate.DeskId})
 	}
 	if len(updatedFields) == 0 {
 		return GetCardById(cardId)

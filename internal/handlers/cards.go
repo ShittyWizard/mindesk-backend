@@ -11,6 +11,7 @@ import (
 
 func initCardsHandlers() {
 	router.HandleFunc("/cards", getAllCards).Methods(http.MethodGet)
+	router.HandleFunc("/cards/{deskId}", getAllCardsByDeskId).Methods(http.MethodGet)
 	router.HandleFunc("/cards/{id}", getCardById).Methods(http.MethodGet)
 	router.HandleFunc("/cards", addNewCard).Methods(http.MethodPost)
 	router.HandleFunc("/cards/{id}", deleteCard).Methods(http.MethodDelete)
@@ -20,6 +21,15 @@ func initCardsHandlers() {
 func getAllCards(w http.ResponseWriter, r *http.Request) {
 	log.Println("Got request getAllCards")
 	err := json.NewEncoder(w).Encode(models.GetAllCards())
+	if err != nil {
+		log.Println(err)
+	}
+}
+
+func getAllCardsByDeskId(w http.ResponseWriter, r *http.Request) {
+	log.Println("Got request getAllCards")
+	deskId, _ := primitive.ObjectIDFromHex(getFieldFromRequest("deskId", r))
+	err := json.NewEncoder(w).Encode(models.GetAllCardsByDeskId(deskId))
 	if err != nil {
 		log.Println(err)
 	}
@@ -93,6 +103,11 @@ func editCard(w http.ResponseWriter, r *http.Request) {
 		log.Println(err)
 		_ = encoder.Encode(&err)
 	}
+}
+
+func getFieldFromRequest(field string, r *http.Request) string {
+	params := mux.Vars(r)
+	return params[field]
 }
 
 func getObjectIdFromRequest(r *http.Request) primitive.ObjectID {
