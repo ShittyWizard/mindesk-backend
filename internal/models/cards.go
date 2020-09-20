@@ -139,7 +139,8 @@ func EditCard(cardId primitive.ObjectID, cardUpdate CardUpdate) (Card, error) {
 		updatedFields = append(updatedFields, bson.E{Key: "dueDate", Value: primitive.NewDateTimeFromTime(newDueDate)})
 	}
 	if len(cardUpdate.DeskId) != 0 {
-		updatedFields = append(updatedFields, bson.E{Key: "deskId", Value: cardUpdate.DeskId})
+		newDeskId, _ := primitive.ObjectIDFromHex(cardUpdate.DeskId)
+		updatedFields = append(updatedFields, bson.E{Key: "deskId", Value: newDeskId})
 	}
 	if len(updatedFields) == 0 {
 		return GetCardById(cardId)
