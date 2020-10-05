@@ -58,6 +58,24 @@ func GetTestDesk() (Desk, error) {
 	return desk, err
 }
 
+func GetAllDesks() ([]*Desk, error) {
+	var desks []*Desk
+	cursor, err := desksCollection.Find(context.Background(), bson.D{})
+	if err != nil {
+		log.Println(err)
+	}
+	for cursor.Next(context.Background()) {
+		desk := Desk{}
+		err := cursor.Decode(&desk)
+		if err != nil {
+			log.Println(err)
+		}
+		desks = append(desks, &desk)
+	}
+
+	return desks, err
+}
+
 func GetDeskById(deskId primitive.ObjectID) (Desk, error) {
 	var desk Desk
 	err := desksCollection.FindOne(context.Background(), bson.D{{"_id", deskId}}).Decode(&desk)
