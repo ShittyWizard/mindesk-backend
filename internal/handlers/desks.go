@@ -8,22 +8,22 @@ import (
 )
 
 func initDesksHandlers() {
-	router.HandleFunc("/desks", getTestDesk).Methods(http.MethodGet)
+	router.HandleFunc("/desks", getAllDesks).Methods(http.MethodGet)
 	router.HandleFunc("/desks/{id}", getDeskById).Methods(http.MethodGet)
 	router.HandleFunc("/desks", addDesk).Methods(http.MethodPost)
 	router.HandleFunc("/desks/{id}", deleteDesk).Methods(http.MethodDelete)
 	router.HandleFunc("/desks/{id}", editDesk).Methods(http.MethodPost)
 }
 
-func getTestDesk(w http.ResponseWriter, r *http.Request) {
-	log.Println("Got request getTestDesk")
+func getAllDesks(w http.ResponseWriter, r *http.Request) {
+	log.Println("Got request getAllDesks")
 	encoder := json.NewEncoder(w)
-	desk, err := models.GetTestDesk()
+	desks, err := models.GetAllDesks()
 	if err != nil {
 		log.Println(err)
 		_ = encoder.Encode(err)
 	}
-	err = encoder.Encode(desk)
+	err = encoder.Encode(desks)
 	if err != nil {
 		log.Println(err)
 		_ = encoder.Encode(err)
