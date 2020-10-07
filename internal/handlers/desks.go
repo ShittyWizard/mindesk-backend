@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"min-desk-backend/internal/models"
+	"min-desk-backend/internal/services"
 	"net/http"
 )
 
@@ -34,12 +35,8 @@ func getDeskById(w http.ResponseWriter, r *http.Request) {
 	log.Println("Got request getDeskById")
 	encoder := json.NewEncoder(w)
 	deskId := getObjectIdFromRequest(r)
-	desk, err := models.GetDeskById(deskId)
-	if err != nil {
-		log.Println(err)
-		_ = encoder.Encode(err)
-	}
-	err = encoder.Encode(desk)
+	deskInfo := services.GetDeskInfoByDeskId(deskId)
+	err := encoder.Encode(deskInfo)
 	if err != nil {
 		log.Println(err)
 		_ = encoder.Encode(err)

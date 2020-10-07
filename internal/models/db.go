@@ -30,9 +30,11 @@ func InitMongoDB(dataSource string) {
 
 	// Init collections
 	InitCardsCollection()
+	InitColumnsCollection()
 	InitDesksCollection()
 
 	// Init test data
 	testDeskId := AddTestDesks()[0]
-	AddTestCards(testDeskId)
+	testColumnId := AddTestColumns(testDeskId)
+	AddTestCards(testColumnId, testDeskId)
 }

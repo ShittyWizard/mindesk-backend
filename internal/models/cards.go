@@ -15,6 +15,7 @@ type Card struct {
 	Description string             `json:"description,omitempty"`
 	AssignedTo  string             `json:"assignedTo,omitempty" bson:"assignedTo,omitempty"`
 	DueDate     primitive.DateTime `json:"dueDate,omitempty" bson:"dueDate,omitempty"`
+	ColumnId    primitive.ObjectID `json:"columnId,omitempty" bson:"columnId,omitempty"`
 	DeskId      primitive.ObjectID `json:"deskId,omitempty" bson:"deskId,omitempty"`
 }
 
@@ -23,11 +24,15 @@ type CardUpdate struct {
 	Description string `json:"description,omitempty"`
 	AssignedTo  string `json:"assignedTo,omitempty" bson:"assignedTo,omitempty"`
 	DueDate     string `json:"dueDate,omitempty" bson:"dueDate,omitempty"`
+	ColumnId    string `json:"columnId,omitempty" bson:"columnId,omitempty"`
 	DeskId      string `json:"deskId,omitempty" bson:"deskId,omitempty"`
 }
 
 var cardsCollectionName = "cards"
 var cardsCollection *mongo.Collection
+
+var CardAddAction = "CARD_ADD"
+var CardRemoveAction = "CARD_REMOVE"
 
 func InitCardsCollection() {
 	log.Println("Initialising CARDS collection...")
@@ -36,18 +41,18 @@ func InitCardsCollection() {
 }
 
 // If you change size of test cards - test it too in test/models/cards_test.go:17
-func AddTestCards(deskId primitive.ObjectID) {
+func AddTestCards(columnId primitive.ObjectID, deskId primitive.ObjectID) {
 	cardsCollection.DeleteMany(context.Background(), bson.D{})
-	testCard1 := CardUpdate{"test name 1", "test description 1", "me1", "25-09-2020", deskId.Hex()}
+	testCard1 := CardUpdate{"test name 1", "test description 1", "me1", "25-09-2020", columnId.Hex(), deskId.Hex()}
 	_, _ = AddCard(testCard1)
 
-	testCard2 := CardUpdate{"test name 2", "test description 2", "me2", "31-12-2020", deskId.Hex()}
+	testCard2 := CardUpdate{"test name 2", "test description 2", "me2", "31-12-2020", columnId.Hex(), deskId.Hex()}
 	_, _ = AddCard(testCard2)
 
-	testCard3 := CardUpdate{"test name 3", "test description 3", "me3", "28-10-2020", deskId.Hex()}
+	testCard3 := CardUpdate{"test name 3", "test description 3", "me3", "28-10-2020", columnId.Hex(), deskId.Hex()}
 	_, _ = AddCard(testCard3)
 
-	testCard4 := CardUpdate{"test name 4", "test description 4", "me4", "26-05-2021", deskId.Hex()}
+	testCard4 := CardUpdate{"test name 4", "test description 4", "me4", "26-05-2021", columnId.Hex(), deskId.Hex()}
 	_, _ = AddCard(testCard4)
 }
 
@@ -88,6 +93,24 @@ func GetAllCardsByDeskId(deskId primitive.ObjectID) []*Card {
 	return cards
 }
 
+func GetAllCardsByColumnId(columnId primitive.ObjectID) []*Card {
+	var cards []*Card
+	cursor, err := cardsCollection.Find(context.Background(), bson.D{{"columnId", columnId}})
+	if err != nil {
+		log.Println(err)
+	}
+	for cursor.Next(context.Background()) {
+		card := Card{}
+		err := cursor.Decode(&card)
+		if err != nil {
+			log.Println(err)
+		}
+		cards = append(cards, &card)
+	}
+
+	return cards
+}
+
 func GetCardById(cardId primitive.ObjectID) (Card, error) {
 	var card Card
 	err := cardsCollection.FindOne(context.Background(), bson.D{{"_id", cardId}}).Decode(&card)
@@ -104,6 +127,7 @@ func AddCard(cardUpdate CardUpdate) (primitive.ObjectID, error) {
 	card.Name = cardUpdate.Name
 	card.Description = cardUpdate.Description
 	card.AssignedTo = cardUpdate.AssignedTo
+	card.ColumnId, _ = primitive.ObjectIDFromHex(cardUpdate.ColumnId)
 	card.DeskId, _ = primitive.ObjectIDFromHex(cardUpdate.DeskId)
 
 	dueDate, err := time.Parse("02-01-2006", cardUpdate.DueDate)
@@ -117,6 +141,9 @@ func AddCard(cardUpdate CardUpdate) (primitive.ObjectID, error) {
 		log.Println(err)
 		return cardId, err
 	}
+
+	addCardToColumn(cardId, card.ColumnId)
+	log.Println("Add card to columnId:" + card.ColumnId.Hex())
 	return cardId, err
 }
 
@@ -142,6 +169,12 @@ func EditCard(cardId primitive.ObjectID, cardUpdate CardUpdate) (Card, error) {
 		newDeskId, _ := primitive.ObjectIDFromHex(cardUpdate.DeskId)
 		updatedFields = append(updatedFields, bson.E{Key: "deskId", Value: newDeskId})
 	}
+	if len(cardUpdate.ColumnId) != 0 {
+		newColumnId, _ := primitive.ObjectIDFromHex(cardUpdate.ColumnId)
+		updatedFields = append(updatedFields, bson.E{Key: "columnId", Value: newColumnId})
+		removeCardFromColumn(cardId)
+		addCardToColumn(cardId, newColumnId)
+	}
 	if len(updatedFields) == 0 {
 		return GetCardById(cardId)
 	}
@@ -164,5 +197,15 @@ func DeleteCard(cardId primitive.ObjectID) error {
 	if err != nil {
 		log.Println(err)
 	}
+	removeCardFromColumn(cardId)
 	return err
+}
+
+func addCardToColumn(cardId primitive.ObjectID, columnId primitive.ObjectID) {
+	_ = UpdateColumnCards(columnId, cardId, CardAddAction)
+}
+
+func removeCardFromColumn(cardId primitive.ObjectID) {
+	card, _ := GetCardById(cardId)
+	_ = UpdateColumnCards(card.ColumnId, cardId, CardRemoveAction)
 }

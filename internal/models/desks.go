@@ -11,12 +11,14 @@ import (
 )
 
 type Desk struct {
-	Id   primitive.ObjectID `json:"_id,omitempty" bson:"_id,omitempty"`
-	Name string             `json:"name,omitempty"`
+	Id        primitive.ObjectID   `json:"_id,omitempty" bson:"_id,omitempty"`
+	Name      string               `json:"name,omitempty"`
+	ColumnIds []primitive.ObjectID `json:"columnIds,omitempty" bson:"columnIds"`
 }
 
 type DeskUpdate struct {
-	Name string `json:"name,omitempty"`
+	Name     string `json:"name,omitempty"`
+	ColumnId string `json:"columndId,omitempty"`
 }
 
 var desksCollectionName = "desks"
@@ -40,6 +42,8 @@ func AddDesk(deskUpdate DeskUpdate) (primitive.ObjectID, error) {
 	var desk Desk
 	desk.Id = deskId
 	desk.Name = deskUpdate.Name
+	desk.ColumnIds = []primitive.ObjectID{primitive.NewObjectID()}
+	desk.ColumnIds = append(desk.ColumnIds[:0], desk.ColumnIds[1:]...)
 
 	_, err := desksCollection.InsertOne(context.Background(), desk)
 	if err != nil {
@@ -47,15 +51,6 @@ func AddDesk(deskUpdate DeskUpdate) (primitive.ObjectID, error) {
 	}
 
 	return deskId, err
-}
-
-func GetTestDesk() (Desk, error) {
-	var desk Desk
-	err := desksCollection.FindOne(context.Background(), bson.D{}).Decode(&desk)
-	if err != nil {
-		log.Println(err)
-	}
-	return desk, err
 }
 
 func GetAllDesks() ([]*Desk, error) {
@@ -112,10 +107,42 @@ func EditDesk(deskId primitive.ObjectID, deskUpdate DeskUpdate) (Desk, error) {
 	}
 }
 
+func UpdateDeskColumns(deskId primitive.ObjectID, columnId primitive.ObjectID, action string) error {
+	var err error
+	if action == ColumnAddAction {
+		err = addColumnIdToDesk(columnId, deskId)
+	} else if action == ColumnRemoveAction {
+		err = removeColumnIdFromDesk(columnId, deskId)
+	}
+	return err
+}
+
 func DeleteDesk(deskId primitive.ObjectID) error {
 	_, err := desksCollection.DeleteOne(context.Background(), bson.D{{"_id", deskId}})
 	if err != nil {
 		log.Println(err)
 	}
+	return err
+}
+
+func addColumnIdToDesk(columnId primitive.ObjectID, deskId primitive.ObjectID) error {
+	log.Println("Add column " + columnId.Hex() + " to desk " + deskId.Hex())
+	_, err := desksCollection.UpdateOne(
+		context.Background(),
+		bson.M{"_id": deskId},
+		bson.D{
+			{"$push", bson.M{"columnIds": columnId}},
+		})
+	return err
+}
+
+func removeColumnIdFromDesk(columnId primitive.ObjectID, deskId primitive.ObjectID) error {
+	log.Println("Add column " + columnId.Hex() + " to desk " + deskId.Hex())
+	_, err := desksCollection.UpdateOne(
+		context.Background(),
+		bson.M{"_id": deskId},
+		bson.D{
+			{"$pull", bson.M{"columnIds": columnId}},
+		})
 	return err
 }
