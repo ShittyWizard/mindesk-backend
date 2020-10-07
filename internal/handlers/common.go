@@ -9,6 +9,7 @@ func InitRouter() *mux.Router {
 
 	initCardsHandlers()
 	initDesksHandlers()
+	initColumnsHandlers()
 
 	return router
 }

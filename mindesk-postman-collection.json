@@ -1,0 +1,311 @@
+{
+	"info": {
+		"_postman_id": "095acef1-dba6-43d8-8490-5725e174e2e2",
+		"name": "MinDesk",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Cards",
+			"item": [
+				{
+					"name": "Add card",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {}
+					},
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\" : \"Card name Ololo\",\n    \"description\" : \"ololo test description\",\n    \"dueDate\" : \"25-12-2020\",\n    \"assignedTo\" : \"Vladi4ka1488\",\n    \"deskId\" : \"5f68e7783635a89c202fdd94\",\n    \"columnId\" : \"5f7e17d7ac66fb6534d9ca6e\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/cards",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"cards"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get cards",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/cards",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"cards"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get cards by deskId",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/cards/5f68e7783635a89c202fdd94",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"cards",
+								"5f68e7783635a89c202fdd94"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete card",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/cards/5f6537cb56dc2bcffd649bca",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"cards",
+								"5f6537cb56dc2bcffd649bca"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Edit card",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\" : \"updated name1\",\n    \"description\" : \"1 test description\",\n    \"dueDate\" : \"22-10-2020\",\n    \"assignedTo\" : \"1 123123123 1\",\n    \"columnId\" : \"5f7e191cac66fb6534d9ca73\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/cards/5f7e1701ac66fb6534d9ca6a",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"cards",
+								"5f7e1701ac66fb6534d9ca6a"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Desks",
+			"item": [
+				{
+					"name": "Get all desks",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/desks",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"desks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Desk Info",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/desks/5f7e1701ac66fb6534d9ca66",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"desks",
+								"5f7e1701ac66fb6534d9ca66"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Add desk",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\" : \"test desk №2\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/desks",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"desks"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete desk",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/desks/5f66540e27d138817eb90a4a",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"desks",
+								"5f66540e27d138817eb90a4a"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Edit desk",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\" : \"test desk updated 1\",\n    \"backgroubnd\" : \"123\",\n    \"asd\" : \"123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/desks/5f66547427d138817eb90a4b",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"desks",
+								"5f66547427d138817eb90a4b"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Columns",
+			"item": [
+				{
+					"name": "Add column to desk",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\" : \"In progress\",\n    \"deskId\" : \"5f7e1701ac66fb6534d9ca66\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:8080/columns",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"columns"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete column",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "http://localhost:8080/columns/5f7e17d7ac66fb6534d9ca6e",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"columns",
+								"5f7e17d7ac66fb6534d9ca6e"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"protocolProfileBehavior": {}
+}
